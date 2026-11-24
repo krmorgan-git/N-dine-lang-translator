@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use N-dine-lang, its specification, or reference Python software in your research or teaching, please cite it as below."
+title: "N-dine-lang: A Lightweight Slot-Tag Intermediate Representation for Diné Bizaad, English, and Python"
+version: 1.0.0
+date-released: 2026-11-20
+authors:
+  - family-names: "Morgan"
+    given-names: "Kelly R."
+    affiliation: "Navajo Technical University"
+    city: "Crownpoint"
+    region: "NM"
+    country: "US"
+keywords:
+  - "N-dine-lang"
+  - "Dine Bizaad"
+  - "Navajo language"
+  - "computational linguistics"
+  - "intermediate representation"
+  - "Python"
+  - "SQLite"
+license: "MIT"

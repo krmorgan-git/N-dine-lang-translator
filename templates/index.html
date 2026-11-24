@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-dine-lang Test Harness (T S V O L)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <p class="eyebrow">N-dine-lang &bull; T S V O L <span class="beta-badge">Beta</span></p>
+            <h1>N-dine-lang Stringent Test Harness</h1>
+            <p class="lead">Direct lexicon lookup and two-step English &rarr; N-dine-lang &rarr; Din&eacute; (ASCII) verification.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            {% if error_msg %}
+            <div class="alert">{{ error_msg }}</div>
+            {% endif %}
+
+            <form method="POST">
+                <div class="radio-group">
+                    <label class="mode-option">
+                        <input type="radio" name="mode" value="single" onchange="resetOnModeChange('single')" {% if mode == 'single' %}checked{% endif %}>
+                        <span>Word / Noun Phrase (Direct DB Lookup)</span>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="mode" value="sentence" onchange="resetOnModeChange('sentence')" {% if mode == 'sentence' %}checked{% endif %}>
+                        <span>Short Sentence Clause (T S V O L: 2&ndash;{{ max_words }} words)</span>
+                    </label>
+                </div>
+
+                <label class="field-label" for="english_input">English Input</label>
+                {% if mode == 'single' %}
+                <input type="text" name="english_input" id="english_input" value="{{ english_input }}" placeholder="Enter a word or noun phrase (e.g. Necktie, Horse blanket)" required>
+                {% else %}
+                <textarea name="english_input" id="english_input" rows="2" placeholder="Enter a short sentence (e.g. I drink cold water at home)" required>{{ english_input }}</textarea>
+                {% endif %}
+
+                <div class="action-bar">
+                    <div id="btn_single_wrap"{% if mode != 'single' %} class="is-hidden"{% endif %}>
+                        <button type="submit" name="action" value="lookup_single" class="btn-db">Lookup in DB (lexicon)</button>
+                    </div>
+
+                    <div id="btn_sentence_wrap"{% if mode != 'sentence' %} class="is-hidden"{% endif %}>
+                        <button type="submit" name="action" value="step1" class="btn-step1"{% if slot_check_ok %} disabled{% endif %}>Step 1: English &rarr; N-dine-lang</button>
+                    </div>
+                </div>
+
+                {% if single_matches is not none %}
+                <div class="box box-db">
+                    <strong class="box-title">Direct Database Matches (<code>db/dine_lex.db</code>)</strong>
+                    {% if single_matches %}
+                    <ul>
+                        {% for m in single_matches %}
+                        <li><strong>{{ m[2] }}</strong> (<code>{{ m[1] }}</code>) &mdash; {{ m[3] }} {% if m[4] %}[N-dine: <code>{{ m[4] }}</code>]{% endif %}</li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="empty-note">No exact match in <code>lexicon</code> for "{{ english_input }}".</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if mode == 'sentence' and (ndine_output or action in ('step1', 'step2')) %}
+                <div class="box box-step1">
+                    <label class="field-label" for="ndine_output">Step 1 &mdash; N-dine-lang Output (Verify or edit canonical T S V O L slots before Step 2)</label>
+                    <input type="text" name="ndine_output" id="ndine_output" value="{{ ndine_output }}" placeholder="[T/Q/C/M]-... S-... V-... O-... L-...">
+                    {% if slot_check_msg %}
+                    <div>
+                        <span class="valid-tag {{ 'valid-ok' if slot_check_ok else 'valid-err' }}">{{ slot_check_msg }}</span>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <button type="submit" name="action" value="step2" class="btn-step2">Step 2: N-dine-lang &rarr; Din&eacute; (ASCII)</button>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if dine_ascii_output %}
+                <div class="box box-step2">
+                    <strong class="box-title">Step 2 &mdash; Din&eacute; (ASCII) Output</strong>
+                    <div class="dine-result">{{ dine_ascii_output }}</div>
+                    {% if lex_refs %}
+                    <div class="ref-heading">Lexicon slot references used</div>
+                    <ul>
+                        {% for ref in lex_refs %}
+                        <li>{{ ref }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </form>
+
+            <div class="footer-bar">
+                <div class="meta">
+                    <code>db/dine_lex.db</code> ({{ db_count }} entries) &bull; <code>csv/</code> ({{ csv_count }} reference sentences) &bull; Gemma 3 1B (Local GGUF)
+                </div>
+                {% if mode == 'sentence' %}
+                <a href="/?mode={{ mode }}" class="btn-reset{% if slot_check_ok %} btn-reset-red{% endif %}">Reset / Start From Scratch</a>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function resetOnModeChange(selectedMode) {
+            window.location.href = "/?mode=" + encodeURIComponent(selectedMode);
+        }
+    </script>
+</body>
+</html>

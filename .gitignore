@@ -1,0 +1,11 @@
+__pycache__/
+.venv/
+.vscode/
+csv/*
+!csv/ex_sents.csv
+db/*
+!db/dine_lex.db
+md/
+models/
+.env
+requirements.txt
