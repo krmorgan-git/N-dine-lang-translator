@@ -32,7 +32,7 @@ SLOT_ORDER = {
 }
 
 # Offline-first GGUF loading
-MODEL_FILENAME = "google_gemma-3-1b-it-Q4_K_M.gguf"
+MODEL_FILENAME = "gemma3-1b-ndine-Q4_K_M.gguf"
 model_path = MODEL_DIR / MODEL_FILENAME
 if not model_path.exists():
     downloaded = hf_hub_download(
@@ -219,14 +219,9 @@ def lookup_slot_lexicon_refs(ndine_text):
 
 
 def step1_english_to_ndine(english_text):
-    examples = load_csv_examples()
-    ex_block = "\n".join(f"English: {ex['english']}\nN-dine-lang: {ex['n_dine']}" for ex in examples)
     prompt = f"""Convert the short English sentence into canonical N-dine-lang T S V O L slots.
 Canonical order: [T/Q/C/M]-[time] S-[subject] V-[verb] O-[object] L-[location]
 Output ONLY the N-dine-lang slot sequence.
-
-Reference Examples:
-{ex_block}
 
 English: {english_text}
 N-dine-lang:"""
@@ -234,7 +229,7 @@ N-dine-lang:"""
     resp = llm.create_chat_completion(
         messages=[{"role": "user", "content": prompt}],
         max_tokens=96,
-        temperature=0.1
+        temperature=0.0
     )
     raw = resp["choices"][0]["message"]["content"].strip()
     raw = re.sub(r"^(N-dine-lang|Output)\s*:\s*", "", raw, flags=re.IGNORECASE).strip()
@@ -242,19 +237,11 @@ N-dine-lang:"""
 
 
 def step2_ndine_to_dine_ascii(ndine_text):
-    examples = load_csv_examples()
-    ex_block = "\n".join(
-        f"N-dine-lang: {ex['n_dine']}\nDine ASCII: {strip_diacritics_ascii(ex['dine_ascii'])}"
-        for ex in examples
-    )
     prompt_pairs, ui_details = lookup_slot_lexicon_refs(ndine_text)
     lex_block = "\n".join(prompt_pairs) if prompt_pairs else "(None)"
 
-    prompt = f"""Translate the N-dine-lang T S V O L sequence into Diné (ASCII) using the reference examples and dictionary roots.
+    prompt = f"""Translate the N-dine-lang T S V O L sequence into Diné (ASCII) using the dictionary roots.
 Output ONLY the Diné (ASCII) words with no English definitions, no apostrophes, and no diacritics.
-
-Reference Examples:
-{ex_block}
 
 Dictionary Roots (concept -> Dine ASCII):
 {lex_block}
@@ -265,7 +252,7 @@ Dine ASCII:"""
     resp = llm.create_chat_completion(
         messages=[{"role": "user", "content": prompt}],
         max_tokens=110,
-        temperature=0.1
+        temperature=0.0
     )
     raw = resp["choices"][0]["message"]["content"].strip()
     raw = re.sub(r"^(Dine ASCII|Output)\s*:\s*", "", raw, flags=re.IGNORECASE).strip()
