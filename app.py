@@ -33,14 +33,12 @@ SLOT_ORDER = {
 
 # Offline-first GGUF loading
 MODEL_FILENAME = "gemma3-1b-ndine-Q4_K_M.gguf"
+MODEL_RELEASE_URL = "https://github.com/krmorgan-git/N-dine-lang-app/releases/download/v1.0/gemma3-1b-ndine-Q4_K_M.gguf"
 model_path = MODEL_DIR / MODEL_FILENAME
 if not model_path.exists():
-    downloaded = hf_hub_download(
-        repo_id="bartowski/google_gemma-3-1b-it-GGUF",
-        filename=MODEL_FILENAME,
-        local_dir=str(MODEL_DIR)
-    )
-    model_path = Path(downloaded)
+    import urllib.request
+    print(f"Downloading {MODEL_FILENAME} from GitHub Release v1.0...")
+    urllib.request.urlretrieve(MODEL_RELEASE_URL, str(model_path))
 
 llm = Llama(
     model_path=str(model_path),

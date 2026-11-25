@@ -189,7 +189,7 @@ From the project root (`N-dine-lang-translator/`), with the virtual environment 
 python app.py
 ```
 
-On the first start the app downloads `google_gemma-3-1b-it-Q4_K_M.gguf` (~769 MB) into `models/` and loads it, so expect a delay and roughly 1.5 GB of RAM in use. Once it is running you will see:
+On the first start the app downloads `gemma3-1b-ndine-Q4_K_M.gguf` (~777 MB) from the `v1.0` GitHub Release into `models/` and loads it, so expect a delay and roughly 1.5 GB of RAM in use. Once it is running you will see:
 
 ```text
  * Running on http://127.0.0.1:5000
