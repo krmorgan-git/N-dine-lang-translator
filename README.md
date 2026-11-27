@@ -1,7 +1,7 @@
 # N-dine-lang-translator
 
 **Author:** Kelly R. Morgan, Assistant Professor of Information Technology  
-**Affiliation:** Navajo Technical University (Crownpoint, NM)  
+**Affiliation:** Navajo Technical University (Crownpoint, NM & Chinle, AZ)  
 **Created:** November 20, 2026  
 **Status:** Beta (limited lexicon coverage and minimal reference sentence examples)
 
