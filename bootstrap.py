@@ -87,13 +87,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         print("  %-11s %s" % (status, path.relative_to(ROOT)))
 
     print("")
-    print("Next steps:")
+    print("Recommended: run ./start.sh (Linux/macOS/WSL) or start.bat (Windows).")
+    print("Manual next steps:")
     print("  1. python3 -m venv .venv")
     print("  2. source .venv/bin/activate")
-    print("  3. python -m pip install --upgrade pip")
-    print("  4. pip install -r requirements.txt")
-    print("  5. (Optional) Edit .env and set GEMINI_API_KEY=<your key>")
-    print("  6. python app.py")
+    print("  3. pip install -r requirements.txt")
+    print("  4. python app.py")
     return 0
 
 

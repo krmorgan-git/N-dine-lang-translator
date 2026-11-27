@@ -21,22 +21,19 @@ This repository provides a local Flask web app to test that workflow using a loc
 
 ## Core Architecture (`T S V O L`)
 
-Every `N-dine-lang` expression follows a strict, unchanging canonical slot order:
+Every `N-dine-lang` expression follows a fixed left-to-right slot order:
 
 ```text
-[T/Q/C/M]-[time]  S-[subject]  V-[verb]  O-[object]  L-[location]
+T-[time]  S-[subject]  V-[verb]  O-[object]  L-[location]
 ```
 
-| Prefix | Role | Description | Example |
+| Prefix | Role | Plain-English Meaning | Example |
 | :--- | :--- | :--- | :--- |
-| **`T-`** | Tense / Time | `pst` (past), `prs` (present), `fut` (future) | `T-pst`, `T-fut-tomorrow` |
-| **`Q-`** | Question | Interrogative marker with tense | `Q-prs` |
-| **`C-`** | Condition | Conditional clause (`if`) | `C-prs` |
-| **`M-`** | Mode / Command | Imperative execution trigger | `M-now` |
-| **`S-`** | Subject | Actor or pronoun (`1sg`, `2sg`, `3sg`, `1pl`, `3pl`) | `S-1sg`, `S-admin` |
-| **`V-`** | Verb | Core action root (`un-` for negation) | `V-drink`, `V-un-allow` |
-| **`O-`** | Object | Direct receiver or target argument | `O-water`, `O-rout-tul` |
-| **`L-`** | Location | Physical or logical destination/environment | `L-home`, `L-serv-dom` |
+| **`T-`** | Time | `pst` (past), `prs` (present), `fut` (future) | `T-pst`, `T-fut-tomorrow` |
+| **`S-`** | Subject | Who does the action (`1sg` = I, `2sg` = you, `1pl` = we, or a noun) | `S-1sg`, `S-boy` |
+| **`V-`** | Verb | The action or state (`un-` means *not*) | `V-drink`, `V-un-like` |
+| **`O-`** | Object | What receives the action | `O-water`, `O-coffee` |
+| **`L-`** | Location | Where it happens or where someone is going | `L-home`, `L-flagstaff` |
 
 ---
 
@@ -63,97 +60,82 @@ Every `N-dine-lang` expression follows a strict, unchanging canonical slot order
 
 ## Requirements
 
-This project targets **Linux and WSL (Windows Subsystem for Linux)**.
-
-* **Python 3.6 or newer** (tested with Python 3.12 in WSL2). Confirm with:
-
-  ```bash
-  python3 --version
-  ```
-
-* **The `venv` module.** On Debian/Ubuntu/WSL, install Python and venv support with:
-
-  ```bash
-  sudo apt update
-  sudo apt install -y python3 python3-venv
-  ```
-
-* **Dependencies:** `flask`, `llama-cpp-python`, and `huggingface_hub` power the web interface and the local Gemma model. All are listed in the generated `requirements.txt` and installed in Setup, Step 4. The same file also lists `google-genai` and `python-dotenv` for optional Gemini-backed features; `app.py` does not use them yet.
-* **Optional:** a **Google Gemini API key** for future Gemini-backed features. `app.py` does not read it yet — the key and the `.env` entry are reserved for when that support lands. Create one at [Google AI Studio](https://aistudio.google.com/apikey) and set `GEMINI_API_KEY` in `.env` (see Setup, Step 2).
-
----
-
-## Repository Structure
-
-```text
-N-dine-lang-translator/
-├── .gitignore        # Excludes caches, environment files, and local-only data
-├── CITATION.cff      # Academic citation metadata for GitHub & Zenodo
-├── LICENSE           # Dual MIT (code) & CC BY 4.0 (specification/docs)
-├── README.md         # Specification overview, setup steps, and citation
-├── csv/
-│   └── ex_sents.csv  # 30 reference sentence pairs (English / Dine ASCII / N-dine-lang)
-├── db/
-│   └── dine_lex.db   # SQLite lexicon, 8,611 entries (~1.4 MB), shipped with the repo
-├── static/
-│   └── styles.css    # Stylesheet for the Flask web UI
-├── templates/
-│   └── index.html    # Jinja2 HTML template for the Flask web UI
-├── bootstrap.py      # Creates md/, .env, and requirements.txt (Setup, Step 2)
-└── app.py            # Flask web app: DB lookup + two-step English -> N-dine-lang -> Dine (ASCII)
-```
-
-The following items are **created locally** when you bootstrap and run the project and are not part of the repository:
-
-```text
-N-dine-lang-translator/
-├── .venv/               # Python virtual environment (Setup, Step 3)
-├── md/                  # Markdown notes/output workspace (bootstrap.py)
-├── models/              # Local GGUF model directory, ~769 MB after first run (bootstrap.py)
-├── .env                 # Local secret: GEMINI_API_KEY (bootstrap.py)
-└── requirements.txt     # Dependencies: flask, llama-cpp-python, huggingface_hub, google-genai, python-dotenv (bootstrap.py)
-```
-
-> `__pycache__/` is not present initially. Python creates it on the first run, and it is safe to delete.
+* **Operating System:** Linux, WSL (Windows Subsystem for Linux), macOS, or Windows.
+* **Python 3.8 or newer** (`python3 --version` on Linux/macOS/WSL, or `python --version` on Windows).  
+  *(On Ubuntu/Debian/WSL, make sure `venv` is installed: `sudo apt update && sudo apt install -y python3 python3-venv`)*
+* **RAM & Disk:** ~1.5 GB free RAM and ~1 GB free disk space (for the local ~777 MB AI model).
 
 ---
 
 ## Setup & Installation
 
-Run these steps in **Linux or WSL** (keep the project in `~/projects/`, not `/mnt/c/...`):
+### Option A: One-Command Install & Run (Recommended)
 
-1. **Clone and bootstrap:**
+**Linux / macOS / WSL:**
+```bash
+git clone https://github.com/krmorgan-git/N-dine-lang-translator.git
+cd N-dine-lang-translator
+bash start.sh
+```
+
+**Windows (Command Prompt / PowerShell):**
+```bat
+git clone https://github.com/krmorgan-git/N-dine-lang-translator.git
+cd N-dine-lang-translator
+start.bat
+```
+
+The script automatically sets up the project, installs dependencies, downloads the AI model (~777 MB) on first run, and starts the web app at **<http://127.0.0.1:5000>**.
+
+> **How to use the app:** Open <http://127.0.0.1:5000> in your browser. Choose **Single word** for a `db/dine_lex.db` dictionary lookup, or **Two or more words** (12 words max) for two-step translation (**English → `N-dine-lang` → Diné ASCII**). Press `Ctrl+C` in the terminal to stop.
+
+### Option B: Manual Setup (Advanced)
+
+1. **Bootstrap & create virtual environment:**
    ```bash
-   mkdir -p ~/projects && cd ~/projects
-   git clone https://github.com/krmorgan-git/N-dine-lang-translator.git
-   cd N-dine-lang-translator
    python3 bootstrap.py
-   ```
-   *(Optional: add `GEMINI_API_KEY=...` in `.env` for future Gemini features.)*
-
-2. **Create `.venv` and install dependencies:**
-   ```bash
    python3 -m venv .venv
    source .venv/bin/activate
+   ```
+2. **Install dependencies:**
+   ```bash
    pip install --upgrade pip
    pip install -r requirements.txt
    ```
-
-3. **Copy the local GGUF model (no download needed):**  
-   This repo does not download the model automatically. Copy `gemma3-1b-ndine-Q4_K_M.gguf` (~777 MB) from your `N-dine-lang-studio/models/` folder into `models/`:
-   ```bash
-   mkdir -p models
-   cp ../N-dine-lang-studio/models/gemma3-1b-ndine-Q4_K_M.gguf models/
-   ```
-
-4. **Run the web app:**
+3. **Run the web app:**
    ```bash
    python app.py
    ```
-   Open <http://127.0.0.1:5000> in your browser. Choose **Single word** for a `db/dine_lex.db` lookup, or **Two or more words** (12 words max) for two-step translation (**English → `N-dine-lang` → Diné ASCII**). Stop with `Ctrl+C`, and run `deactivate` when finished.
 
-* **macOS:** Same commands work (`python3`).  
-* **Windows (native):** Use `python -m venv .venv` and `.venv\Scripts\Activate.ps1` in PowerShell.
+---
+
+## Repository Structure
+
+After running **Setup & Installation** and `python app.py`:
+
+```text
+N-dine-lang-translator/
+├── .env                              # Local secret: GEMINI_API_KEY (bootstrap.py)
+├── .gitignore                        # Excludes caches, environment files, and local-only data
+├── .venv/                            # Python virtual environment (Setup, Step 2)
+├── CITATION.cff                      # Academic citation metadata for GitHub & Zenodo
+├── LICENSE                           # Dual MIT (code) & CC BY 4.0 (specification/docs)
+├── README.md                         # Specification overview, setup steps, and citation
+├── csv/
+│   └── ex_sents.csv                  # 30 reference sentence pairs (English / Dine ASCII / N-dine-lang)
+├── db/
+│   └── dine_lex.db                   # SQLite lexicon, 8,611 entries (~1.4 MB), shipped with the repo
+├── md/                               # Markdown notes/output workspace (bootstrap.py)
+├── models/
+│   └── gemma3-1b-ndine-Q4_K_M.gguf   # Local GGUF model (~777 MB), downloaded on first run (app.py)
+├── static/
+│   └── styles.css                    # Stylesheet for the Flask web UI
+├── templates/
+│   └── index.html                    # Jinja2 HTML template for the Flask web UI
+├── requirements.txt                  # Dependencies: flask, llama-cpp-python, huggingface_hub, google-genai, python-dotenv
+├── bootstrap.py                      # Creates md/, .env, and requirements.txt (Setup, Step 1)
+└── app.py                            # Flask web app: DB lookup + two-step English -> N-dine-lang -> Dine (ASCII)
+```
 
 ---
 
