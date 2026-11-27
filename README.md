@@ -139,8 +139,12 @@ Run these steps in **Linux or WSL** (keep the project in `~/projects/`, not `/mn
    pip install -r requirements.txt
    ```
 
-3. **Add the local GGUF model:**  
-   Copy `gemma3-1b-ndine-Q4_K_M.gguf` (~777 MB, built in `N-dine-lang-studio`) into `models/gemma3-1b-ndine-Q4_K_M.gguf`.
+3. **Copy the local GGUF model (no download needed):**  
+   This repo does not download the model automatically. Copy `gemma3-1b-ndine-Q4_K_M.gguf` (~777 MB) from your `N-dine-lang-studio/models/` folder into `models/`:
+   ```bash
+   mkdir -p models
+   cp ../N-dine-lang-studio/models/gemma3-1b-ndine-Q4_K_M.gguf models/
+   ```
 
 4. **Run the web app:**
    ```bash
