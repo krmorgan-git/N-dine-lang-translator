@@ -33,7 +33,7 @@ SLOT_ORDER = {
 
 # Offline-first GGUF loading (auto-downloads from N-dine-lang-app Releases if missing)
 MODEL_FILENAME = "gemma3-1b-ndine-Q4_K_M.gguf"
-MODEL_RELEASES_PAGE = "https://github.com/krmorgan-git/N-dine-lang-app/releases"
+MODEL_RELEASES_PAGE = "https://github.com/krmorgan-git/N-dine-lang/releases"
 MODEL_RELEASE_URL = f"{MODEL_RELEASES_PAGE}/download/v1.0/{MODEL_FILENAME}"
 model_path = MODEL_DIR / MODEL_FILENAME
 if not model_path.exists():
