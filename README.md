@@ -120,95 +120,36 @@ N-dine-lang-translator/
 
 ## Setup & Installation
 
-These steps apply to **Linux and WSL**. In WSL, run every command in your Linux terminal (not PowerShell or `cmd`).
+Run these steps in **Linux or WSL** (keep the project in `~/projects/`, not `/mnt/c/...`):
 
-> **WSL tip:** keep the project inside the Linux filesystem — for example `~/projects/` — not under `/mnt/c/...`. Working from the Windows drive is noticeably slower and can cause permission and virtual-environment problems.
+1. **Clone and bootstrap:**
+   ```bash
+   mkdir -p ~/projects && cd ~/projects
+   git clone https://github.com/krmorgan-git/N-dine-lang-translator.git
+   cd N-dine-lang-translator
+   python3 bootstrap.py
+   ```
+   *(Optional: add `GEMINI_API_KEY=...` in `.env` for future Gemini features.)*
 
-### 1. Clone the repository
+2. **Create `.venv` and install dependencies:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
 
-```bash
-mkdir -p ~/projects
-cd ~/projects
-git clone https://github.com/krmorgan-git/N-dine-lang-translator.git
-cd N-dine-lang-translator
-```
+3. **Add the local GGUF model:**  
+   Copy `gemma3-1b-ndine-Q4_K_M.gguf` (~777 MB, built in `N-dine-lang-studio`) into `models/gemma3-1b-ndine-Q4_K_M.gguf`.
 
-### 2. Initialize the project layout
+4. **Run the web app:**
+   ```bash
+   python app.py
+   ```
+   Open <http://127.0.0.1:5000> in your browser. Choose **Single word** for a `db/dine_lex.db` lookup, or **Two or more words** (12 words max) for two-step translation (**English → `N-dine-lang` → Diné ASCII**). Stop with `Ctrl+C`, and run `deactivate` when finished.
 
-Immediately after cloning, run the bootstrap script from the project root:
-
-```bash
-python3 bootstrap.py
-```
-
-This creates `md/` and `.env`, and writes `requirements.txt` if it is missing. `csv/` and `db/` ship with the repository, and `models/` is created by `app.py` when it first loads the model.
-
-> **Optional:** open `.env` and add your Gemini API key — only needed for Gemini-backed features. If you are not using Gemini, skip this step.
-
-```ini
-GEMINI_API_KEY=your-api-key-here
-```
-
-Get a key from [Google AI Studio](https://aistudio.google.com/apikey). `.env` is git-ignored, so the key stays local and must never be committed. As an alternative, export the variable in your shell — environment variables take precedence over `.env`:
-
-```bash
-export GEMINI_API_KEY="your-api-key-here"
-```
-
-Existing files are preserved; `python bootstrap.py --force` regenerates the templates (and overwrites `.env`, so only use it before adding a real key).
-
-### 3. Create and activate a virtual environment (recommended)
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-Your prompt should now show the environment name, for example `(.venv) user@host:~/projects/N-dine-lang-translator$`.
-
-If this fails with an `ensurepip is not available` error, install the venv package and retry:
-
-```bash
-sudo apt install -y python3-venv
-```
-
-### 4. Install dependencies
-
-Upgrade `pip`, then install the dependencies declared in `requirements.txt`:
-
-```bash
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-### 5. Run the web app
-
-From the project root (`N-dine-lang-translator/`), with the virtual environment active:
-
-```bash
-python app.py
-```
-
-On the first start the app downloads `gemma3-1b-ndine-Q4_K_M.gguf` (~777 MB) from the `v1.0` GitHub Release into `models/` and loads it, so expect a delay and roughly 1.5 GB of RAM in use. Once it is running you will see:
-
-```text
- * Running on http://127.0.0.1:5000
-```
-
-Open <http://127.0.0.1:5000> in a browser. Choose **Single word** for a direct `lexicon` lookup, or **Two or more words** (12 words max) to run Step 1 (English → N-dine-lang), edit the slot line if needed, then Step 2 (N-dine-lang → Diné ASCII). Stop the server with `Ctrl+C`.
-
-`db/dine_lex.db` ships with the repository (8,611 lexicon entries), so there is nothing to generate before the first run. `db/` is git-ignored except for that file, so any other SQLite files you create stay local.
-
-### 6. Deactivate when finished
-
-```bash
-deactivate
-```
-
-### Other platforms (brief)
-
-* **macOS:** the same commands work (`python3` is provided by the system or Homebrew).
-* **Windows (native):** use `python -m venv .venv` and activate with `.venv\Scripts\Activate.ps1` in PowerShell. WSL is the path documented above.
+* **macOS:** Same commands work (`python3`).  
+* **Windows (native):** Use `python -m venv .venv` and `.venv\Scripts\Activate.ps1` in PowerShell.
 
 ---
 

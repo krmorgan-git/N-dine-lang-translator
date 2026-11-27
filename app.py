@@ -33,12 +33,12 @@ SLOT_ORDER = {
 
 # Offline-first GGUF loading
 MODEL_FILENAME = "gemma3-1b-ndine-Q4_K_M.gguf"
-MODEL_RELEASE_URL = "https://github.com/krmorgan-git/N-dine-lang-app/releases/download/v1.0/gemma3-1b-ndine-Q4_K_M.gguf"
 model_path = MODEL_DIR / MODEL_FILENAME
 if not model_path.exists():
-    import urllib.request
-    print(f"Downloading {MODEL_FILENAME} from GitHub Release v1.0...")
-    urllib.request.urlretrieve(MODEL_RELEASE_URL, str(model_path))
+    raise FileNotFoundError(
+        f"Missing model file: {model_path}\n"
+        f"Copy {MODEL_FILENAME} from N-dine-lang-studio/models/ into {MODEL_DIR}/ and restart app.py."
+    )
 
 llm = Llama(
     model_path=str(model_path),
